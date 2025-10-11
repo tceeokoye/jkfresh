@@ -81,7 +81,7 @@ export function SearchBar({ onSearch, placeholder = "Search for products...", cl
 
   return (
     <div className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="relative">
+      <form onSubmit={handleSubmit} className="relative ">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"

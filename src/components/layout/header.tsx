@@ -3,10 +3,12 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useSelector, useDispatch } from "react-redux"
+import { useRouter } from "next/navigation"
 import { Search, ShoppingCart, User, Menu, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion" // ⬅️ import framer-motion
+import type { CartItem as CartItemType } from "@/types/global"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,8 +29,12 @@ export function Header() {
   const pathname = usePathname()
   const { items } = useSelector((state: RootState) => state.cart)
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth)
+  const router = useRouter()
 
-  const cartItemCount = items.reduce((total, item) => total + item.quantity, 0)
+ const cartItemCount = items.reduce(
+  (total: number, item: CartItemType) => total + item.quantity,
+  0
+)
 
   const navigation = [
     { name: "Flyer", href: "/flyer" },
@@ -88,11 +94,11 @@ export function Header() {
       </div>
 
       {/* Main header */}
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto ">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-          <Image src={LOGO} alt="LOGO" width={60} height={40}/>
+          <Image src={LOGO} alt="LOGO" width={80} height={70}/>
              {/* <LOGO width={160} height={80} scale={0.5} />  
             <Image src="/public/jk-fresh-grocery-store-logo.png" alt="JK Fresh" width={160} height={80} className="h-12 w-auto" /> */}
           </Link>
@@ -106,7 +112,7 @@ export function Header() {
                   key={item.name}
                   variants={shakeAnimation}
                   whileHover="hover"
-                  className={`px-3 py-2 rounded-md font-medium transition-all ${
+                  className={`px-3 py-2 text-xl rounded-md font-medium transition-all ${
                     isActive ? "bg-primary text-white" : "text-foreground hover:bg-muted"
                   }`}
                 >
@@ -131,9 +137,11 @@ export function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                  <User  size={40}  />
                 </Button>
+                
               </DropdownMenuTrigger>
+             
               <DropdownMenuContent align="end" className="w-56">
                 {isAuthenticated ? (
                   <>
@@ -163,7 +171,7 @@ export function Header() {
             </DropdownMenu>
 
             {/* Cart */}
-            <Button variant="ghost" size="icon" className="relative" onClick={() => dispatch(toggleCart())}>
+            <Button variant="ghost" size="icon" className="relative" onClick={() => {dispatch(toggleCart()); router.push("/cart")}}>
               <ShoppingCart className="h-5 w-5" />
               {cartItemCount > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">

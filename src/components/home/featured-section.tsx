@@ -1,12 +1,11 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowRight, ShoppingCart, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, ShoppingCart, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const featuredItems = [
   {
@@ -49,14 +48,16 @@ const featuredItems = [
     type: "category",
     badge: "Baked Today",
   },
-]
+];
 
 export function FeaturedSection() {
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-foreground mb-4">The Latest from JK Fresh</h2>
+          <h2 className="text-4xl font-bold text-foreground mb-4">
+            The Latest from JK Fresh
+          </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Discover our weekly specials, fresh arrivals, and premium selections
           </p>
@@ -64,25 +65,48 @@ export function FeaturedSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredItems.map((item) => (
-            <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
+            <Card
+              key={item.id}
+              className="group overflow-hidden hover:shadow-lg transition-shadow"
+            >
               <div className="relative aspect-[4/3] overflow-hidden">
-                <Image
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                <div>
+                  <Image
+                    src={item.image || "/placeholder.svg"}
+                    alt={item.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <Badge className="absolute top-4 left-4 bg-secondary text-secondary-foreground">{item.badge}</Badge>
+                <Badge className="absolute top-4 left-4 bg-secondary text-secondary-foreground">
+                  {item.badge}
+                </Badge>
                 <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <h3 className="font-semibold text-lg mb-2 text-balance">{item.title}</h3>
-                  <p className="text-sm opacity-90 text-pretty">{item.description}</p>
+                  <h3 className="font-semibold text-lg mb-2 text-balance">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm opacity-90 text-pretty">
+                    {item.description}
+                  </p>
                 </div>
               </div>
               <CardContent className="p-4">
-                <Button asChild className="w-full" variant={item.type === "flyer" ? "default" : "outline"}>
-                  <Link href={item.link} className="flex items-center justify-center gap-2">
-                    {item.type === "flyer" ? <Eye className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                <Button
+                  asChild
+                  className="w-full"
+                  variant={item.type === "flyer" ? "default" : "outline"}
+                >
+                  <Link
+                    href={item.link}
+                    className="flex items-center justify-center gap-2"
+                  >
+                    {item.type === "flyer" ? (
+                      <Eye className="w-4 h-4" />
+                    ) : (
+                      <ShoppingCart className="w-4 h-4" />
+                    )}
                     {item.cta}
                     <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -93,5 +117,5 @@ export function FeaturedSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

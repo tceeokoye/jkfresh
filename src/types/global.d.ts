@@ -20,43 +20,6 @@ export interface Address {
   country: string;
 }
 
-export interface Product {
-  salePrice: number;
-  originalPrice: number;
-  id: string;
-  name: string;
-  description: string;
-
-  originalPrice?: number;
-  category: string;
-  subcategory?: string;
- 
-  images: string[];
-  inStock: boolean;
-  stockQuantity: number;
-  unit: string; // 'lb', 'kg', 'each', 'pack'
-  nutrition?: NutritionInfo;
-  tags: string[];
- 
-  image: string | File | null |StaticImport;
-  stock: number;
-  rating: number;
-  reviewCount: number;
-  isOrganic: boolean;
-  nutritionFacts: {
-    calories: number;
-    protein: string;
-    carbs: string;
-    fat: string;
-    fiber: string;
-    sugar: string;
-  };
-  ingredients: [string];
-  allergens: [];
-  origin: string;
-  storageInstructions: string
-}
-
 export interface NutritionInfo {
   calories: number;
   protein: number;
@@ -65,6 +28,51 @@ export interface NutritionInfo {
   fiber: number;
   sugar: number;
 }
+export interface Product {
+  id: string
+  name: string
+  description: string
+  category: string
+  subcategory?: string
+  salePrice: number
+  originalPrice?: number
+  image: string
+  images?: string[]
+  inStock: boolean
+  stockQuantity?: number
+  stock?: number
+  unit: string
+  tags?: string[]
+  rating?: number
+  reviewCount?: number
+  isOrganic?: boolean
+  origin?: string
+  storageInstructions?: string
+
+  // ✅ Add this line:
+  nutrition?: {
+    calories: number
+    protein: number
+    carbs: number
+    fat: number
+    fiber: number
+    sugar: number
+  }
+
+  // Already existing
+  nutritionFacts?: {
+    calories?: string | number
+    protein?: string | number
+    carbs?: string | number
+    fat?: string | number
+    fiber?: string | number
+    sugar?: string | number
+  }
+
+  ingredients?: string[]
+  allergens?: string[]
+}
+
 
 export interface CartItem {
   product: Product;

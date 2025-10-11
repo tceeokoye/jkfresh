@@ -7,6 +7,7 @@ interface CartState {
   subtotal: number
   tax: number
   total: number
+  itemCount: number
 }
 
 const initialState: CartState = {
@@ -15,14 +16,16 @@ const initialState: CartState = {
   subtotal: 0,
   tax: 0,
   total: 0,
+  itemCount: 0,
 }
 
 const calculateTotals = (items: CartItem[]) => {
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-  const tax = subtotal * 0.13 // 13% HST for Canada
+  const subtotal = items.reduce((sum, item) => sum + item.product.salePrice * item.quantity, 0)
+  const tax = subtotal * 0.13 // Example: 13% HST
   const total = subtotal + tax
+  const itemCount = items.reduce((count, item) => count + item.quantity, 0)
 
-  return { subtotal, tax, total }
+  return { subtotal, tax, total, itemCount }
 }
 
 const cartSlice = createSlice({
@@ -32,38 +35,30 @@ const cartSlice = createSlice({
     addToCart: (state, action: PayloadAction<{ product: Product; quantity?: number; selectedWeight?: number }>) => {
       const { product, quantity = 1, selectedWeight } = action.payload
       const existingItem = state.items.find(
-        (item) => item.product.id === product.id && item.selectedWeight === selectedWeight,
+        (item) => item.product.id === product.id && item.selectedWeight === selectedWeight
       )
 
       if (existingItem) {
         existingItem.quantity += quantity
       } else {
-        state.items.push({
-          product,
-          quantity,
-          selectedWeight,
-        })
+        state.items.push({ product, quantity, selectedWeight })
       }
 
-      const totals = calculateTotals(state.items)
-      state.subtotal = totals.subtotal
-      state.tax = totals.tax
-      state.total = totals.total
+      Object.assign(state, calculateTotals(state.items))
     },
+
     removeFromCart: (state, action: PayloadAction<{ productId: string; selectedWeight?: number }>) => {
       const { productId, selectedWeight } = action.payload
       state.items = state.items.filter(
-        (item) => !(item.product.id === productId && item.selectedWeight === selectedWeight),
+        (item) => !(item.product.id === productId && item.selectedWeight === selectedWeight)
       )
 
-      const totals = calculateTotals(state.items)
-      state.subtotal = totals.subtotal
-      state.tax = totals.tax
-      state.total = totals.total
+      Object.assign(state, calculateTotals(state.items))
     },
+
     updateQuantity: (
       state,
-      action: PayloadAction<{ productId: string; quantity: number; selectedWeight?: number }>,
+      action: PayloadAction<{ productId: string; quantity: number; selectedWeight?: number }>
     ) => {
       const { productId, quantity, selectedWeight } = action.payload
       const item = state.items.find((item) => item.product.id === productId && item.selectedWeight === selectedWeight)
@@ -76,26 +71,34 @@ const cartSlice = createSlice({
         }
       }
 
-      const totals = calculateTotals(state.items)
-      state.subtotal = totals.subtotal
-      state.tax = totals.tax
-      state.total = totals.total
+      Object.assign(state, calculateTotals(state.items))
     },
+
     clearCart: (state) => {
       state.items = []
       state.subtotal = 0
       state.tax = 0
       state.total = 0
+      state.itemCount = 0
     },
+
     toggleCart: (state) => {
       state.isOpen = !state.isOpen
     },
+
     setCartOpen: (state, action: PayloadAction<boolean>) => {
       state.isOpen = action.payload
     },
   },
 })
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart, toggleCart, setCartOpen } = cartSlice.actions
+export const {
+  addToCart,
+  removeFromCart,
+  updateQuantity,
+  clearCart,
+  toggleCart,
+  setCartOpen,
+} = cartSlice.actions
 
 export default cartSlice.reducer

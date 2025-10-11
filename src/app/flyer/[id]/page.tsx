@@ -9,7 +9,7 @@ import { DealsGrid } from "@/components/flyer/deals-grid"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Share2, Download } from "lucide-react"
 import Link from "next/link"
-import type { Flyer } from "../../../src/types/global"
+import type { Flyer } from "@/types/global"
 
 // Mock flyer data - replace with actual API call
 const mockFlyer: Flyer = {

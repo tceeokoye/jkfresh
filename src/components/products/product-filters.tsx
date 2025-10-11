@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -10,11 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ChevronDown, X, Filter } from "lucide-react"
 import { formatPrice } from "../../utils/helpers"
-
-interface ProductFiltersProps {
-  onFiltersChange?: (filters: ProductFilters) => void
-  className?: string
-}
+import { productCategories } from "@/data/productCategories"
 
 export interface ProductFilters {
   categories: string[]
@@ -25,18 +22,10 @@ export interface ProductFilters {
   rating: number
 }
 
-const categories = [
-  "Fresh Produce",
-  "Meat & Seafood",
-  "Dairy & Eggs",
-  "Bakery",
-  "Pantry Essentials",
-  "Frozen Foods",
-  "Beverages",
-  "Snacks",
-  "Health & Beauty",
-  "Household",
-]
+interface ProductFiltersProps {
+  onFiltersChange?: (filters: ProductFilters) => void
+  className?: string
+}
 
 export function ProductFilters({ onFiltersChange, className }: ProductFiltersProps) {
   const [filters, setFilters] = useState<ProductFilters>({
@@ -55,6 +44,9 @@ export function ProductFilters({ onFiltersChange, className }: ProductFiltersPro
     features: true,
   })
 
+  // NEW: control open/close for nested subcategories
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({})
+
   const updateFilters = (newFilters: Partial<ProductFilters>) => {
     const updated = { ...filters, ...newFilters }
     setFilters(updated)
@@ -66,6 +58,10 @@ export function ProductFilters({ onFiltersChange, className }: ProductFiltersPro
       ? filters.categories.filter((c) => c !== category)
       : [...filters.categories, category]
     updateFilters({ categories })
+  }
+
+  const toggleCategoryOpen = (name: string) => {
+    setOpenCategories((prev) => ({ ...prev, [name]: !prev[name] }))
   }
 
   const clearFilters = () => {
@@ -93,45 +89,106 @@ export function ProductFilters({ onFiltersChange, className }: ProductFiltersPro
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }))
   }
 
+  // Recursive render for nested categories with Framer Motion animation
+  const renderCategoryTree = (categories: typeof productCategories, level = 0) => {
+    return (
+      <div className={`ml-${level * 2}`}>
+        {categories.map((cat) => {
+          const isOpen = openCategories[cat.name] || false
+          const hasSubcategories = !!cat.subcategories?.length
+
+          return (
+            <div key={cat.name} className="space-y-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id={cat.name}
+                    checked={filters.categories.includes(cat.name)}
+                    onCheckedChange={() => toggleCategory(cat.name)}
+                  />
+                  <Label htmlFor={cat.name} className="text-sm cursor-pointer">
+                    {cat.name}
+                  </Label>
+                </div>
+
+                {hasSubcategories && (
+                  <button
+                    type="button"
+                    onClick={() => toggleCategoryOpen(cat.name)}
+                    className="ml-2 p-1 hover:bg-muted rounded"
+                  >
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                )}
+              </div>
+
+              {/* Animated subcategories */}
+              <AnimatePresence initial={false}>
+                {hasSubcategories && isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="ml-4 border-l border-muted pl-3 overflow-hidden"
+                  >
+                    {renderCategoryTree(cat.subcategories!, level + 1)}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
     <Card className={className}>
-      <CardHeader>
+      <CardHeader className=" e rounded-t-lg">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
             Filters
-            {activeFiltersCount > 0 && <Badge variant="secondary">{activeFiltersCount}</Badge>}
+            {activeFiltersCount > 0 && (
+              <Badge variant="secondary" className="bg-white text-red-700">
+                {activeFiltersCount}
+              </Badge>
+            )}
           </CardTitle>
           {activeFiltersCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-red-600"
+              onClick={clearFilters}
+            >
               <X className="h-4 w-4 mr-1" />
               Clear
             </Button>
           )}
         </div>
       </CardHeader>
+
       <CardContent className="space-y-6">
         {/* Categories */}
         <Collapsible open={openSections.categories} onOpenChange={() => toggleSection("categories")}>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full justify-between p-0 h-auto">
               <span className="font-medium">Categories</span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.categories ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  openSections.categories ? "rotate-180" : ""
+                }`}
+              />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-2 mt-3">
-            {categories.map((category) => (
-              <div key={category} className="flex items-center space-x-2">
-                <Checkbox
-                  id={category}
-                  checked={filters.categories.includes(category)}
-                  onCheckedChange={() => toggleCategory(category)}
-                />
-                <Label htmlFor={category} className="text-sm cursor-pointer">
-                  {category}
-                </Label>
-              </div>
-            ))}
+            {renderCategoryTree(productCategories)}
           </CollapsibleContent>
         </Collapsible>
 
@@ -140,7 +197,11 @@ export function ProductFilters({ onFiltersChange, className }: ProductFiltersPro
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full justify-between p-0 h-auto">
               <span className="font-medium">Price Range</span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.price ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  openSections.price ? "rotate-180" : ""
+                }`}
+              />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4 mt-3">
@@ -161,12 +222,17 @@ export function ProductFilters({ onFiltersChange, className }: ProductFiltersPro
         </Collapsible>
 
         {/* Availability */}
-        <Collapsible open={openSections.availability} onOpenChange={() => toggleSection("availability")}>
+        <Collapsible
+          open={openSections.availability}
+          onOpenChange={() => toggleSection("availability")}
+        >
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full justify-between p-0 h-auto">
               <span className="font-medium">Availability</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${openSections.availability ? "rotate-180" : ""}`}
+                className={`h-4 w-4 transition-transform ${
+                  openSections.availability ? "rotate-180" : ""
+                }`}
               />
             </Button>
           </CollapsibleTrigger>
@@ -199,7 +265,11 @@ export function ProductFilters({ onFiltersChange, className }: ProductFiltersPro
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full justify-between p-0 h-auto">
               <span className="font-medium">Features</span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.features ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  openSections.features ? "rotate-180" : ""
+                }`}
+              />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 mt-3">
@@ -223,7 +293,9 @@ export function ProductFilters({ onFiltersChange, className }: ProductFiltersPro
                     variant={filters.rating >= rating ? "default" : "outline"}
                     size="sm"
                     className="w-8 h-8 p-0"
-                    onClick={() => updateFilters({ rating: filters.rating === rating ? 0 : rating })}
+                    onClick={() =>
+                      updateFilters({ rating: filters.rating === rating ? 0 : rating })
+                    }
                   >
                     {rating}
                   </Button>
