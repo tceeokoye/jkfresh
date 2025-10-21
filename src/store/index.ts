@@ -1,27 +1,13 @@
+// store/index.ts
 import { configureStore } from "@reduxjs/toolkit"
-import { combineReducers } from "@reduxjs/toolkit"
-import authSlice from "./slices/authSlice"
-import cartSlice from "./slices/cartSlice"
-import flyerSlice from "./slices/flyerSlice"
-import productSlice from "./slices/productSlice"
-import uiSlice from "./slices/uiSlice"
-
-const rootReducer = combineReducers({
-  auth: authSlice,
-  cart: cartSlice,
-  flyer: flyerSlice,
-  product: productSlice,
-  ui: uiSlice,
-})
+import cartReducer from "./cartSlice"
+import userReducer  from "./userSlice"
 
 export const store = configureStore({
-  reducer: rootReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        // Standard Redux Toolkit configuration
-      },
-    }),
+  reducer: {
+    cart: cartReducer,
+      user: userReducer,
+  },
 })
 
 export type RootState = ReturnType<typeof store.getState>
